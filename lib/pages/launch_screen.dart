@@ -1,6 +1,7 @@
 import 'package:dark_champion/configs/config.dart';
 import 'package:dark_champion/cores/context.dart';
 import 'package:dark_champion/middlewares/scaffold_middle_ware.dart';
+import 'package:dark_champion/pages/login_page.dart';
 import 'package:dark_champion/repositories/page_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,10 @@ class _LaunchScreenState extends State<LaunchScreen> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ScaffoldMiddleWare(
-            child: Container(),
+            child: LoginPage(
+              context: this.myContext,
+              config: this.config,
+            ),
           ),
         ),
       );
