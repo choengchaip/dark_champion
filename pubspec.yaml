@@ -57,6 +57,7 @@ flutter:
     - lib/locales/th.json
     - lib/locales/en.json
     - lib/fonts/
+    - lib/assets/components/joystick/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -36,6 +36,7 @@ class _MapPageState extends State<MapPage> {
   late bool isUpdating;
   late bool testBool;
   late StreamController<bool> testBoolSC;
+  late IPosition oldPosition;
   Timer? t;
   Timer? tt;
 
@@ -51,6 +52,21 @@ class _MapPageState extends State<MapPage> {
     this.deltaSC.add(this.delta);
     this.testBoolSC.add(this.testBool);
 
+    this.oldPosition = IPosition(xDirection: MovingDirection.Forward, xAcceleration: 0);
+    this.t = Timer.periodic(Duration(milliseconds: 1), (_) {
+      if(this.oldPosition.yDirection == MovingDirection.TopWard) {
+        this.delta.y += this.oldPosition.yAcceleration!;
+      } else if (this.oldPosition.yDirection == MovingDirection.DownWard) {
+        this.delta.y -= this.oldPosition.yAcceleration!;
+      }
+      if(this.oldPosition.xDirection == MovingDirection.Forward) {
+        this.delta.x += this.oldPosition.xAcceleration!;
+      } else if (this.oldPosition.xDirection == MovingDirection.Backward) {
+        this.delta.x -= this.oldPosition.xAcceleration!;
+      }
+
+      this.deltaSC.add(this.delta);
+    });
     this.tt = Timer.periodic(Duration(seconds: 1), (_) {
       this.testBool = !this.testBool;
       this.testBoolSC.add(this.testBool);
@@ -100,17 +116,12 @@ class _MapPageState extends State<MapPage> {
             Positioned(
               bottom: 16,
               left: 16,
-              child: JoyStick(onChange: (p) {
-                this.t?.cancel();
-                this.t = new Timer.periodic(Duration(milliseconds: 0), (timer) {
-                  if (p.direction == MovingDirection.Forward) {
-                    this.delta.x += p.acceleration ?? 0;
-                  } else {
-                    this.delta.x -= p.acceleration ?? 0;
-                  }
-                  this.deltaSC.add(this.delta);
-                });
-              }),
+              child: JoyStick(
+                width: 150,
+                onChange: (p) {
+                  this.oldPosition = p;
+                },
+              ),
             ),
             StreamBuilder<IDelta>(
               stream: this.deltaSC.stream,

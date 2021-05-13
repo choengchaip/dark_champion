@@ -4,29 +4,43 @@ import 'package:flutter/material.dart';
 enum MovingDirection {
   Forward,
   Backward,
+  TopWard,
+  DownWard,
 }
 
 class IPosition {
-  MovingDirection? direction;
-  double? acceleration;
+  MovingDirection? xDirection;
+  MovingDirection? yDirection;
+  double? xAcceleration;
+  double? yAcceleration;
 
   IPosition({
-    this.direction,
-    this.acceleration,
+    this.xDirection,
+    this.yDirection,
+    this.xAcceleration,
+    this.yAcceleration,
   }) {
-    if (this.direction == null) {
-      this.direction = MovingDirection.Forward;
+    if (this.xDirection == null) {
+      this.xDirection = MovingDirection.Forward;
     }
-    if (this.acceleration == null) {
-      this.acceleration = 0.0;
+    if (this.yDirection == null) {
+      this.xDirection = MovingDirection.TopWard;
+    }
+    if (this.xAcceleration == null) {
+      this.xAcceleration = 0.0;
+    }
+    if (this.yAcceleration == null) {
+      this.yAcceleration = 0.0;
     }
   }
 }
 
 class JoyStick extends StatefulWidget {
+  final double width;
   final Function(IPosition position) onChange;
 
   JoyStick({
+    required this.width,
     required this.onChange,
   });
 
@@ -38,51 +52,74 @@ class JoyStick extends StatefulWidget {
 
 class _JoyStickState extends State<JoyStick> {
   late IPosition position;
+  late bool updatingLoop;
   late double topDelta;
   late double leftDelta;
 
   @override
   void initState() {
-    this.position = IPosition(acceleration: 0);
-    this.topDelta = 50;
-    this.leftDelta = 50;
+    this.position = IPosition(xAcceleration: 0, yAcceleration: 0);
+    this.updatingLoop = false;
+    this.topDelta = widget.width / 2;
+    this.leftDelta = widget.width / 2;
 
     super.initState();
   }
 
-  onPanUpdate(double x, double y) {
-    double max = 50;
-    MovingDirection direction =
-        x < 50 ? MovingDirection.Backward : MovingDirection.Forward;
-    double nx = x < 25
-        ? 25
-        : x > 125
-            ? 125
-            : x;
-    double ny = y < 25
-        ? 25
-        : y > 125
-            ? 125
-            : y;
-    double result = (50 - (nx - 25).abs()) * 100 / max;
+  onPanUpdate(DragUpdateDetails d) {
+    double min = widget.width * 0.125;
+    double max = widget.width - min;
+    double ny = (d.localPosition.dy * 100) / widget.width > 100
+        ? 100
+        : (d.localPosition.dy * 100) / widget.width < 0
+            ? 0
+            : (d.localPosition.dy * 100) / widget.width;
+    double nx = (d.localPosition.dx * 100) / widget.width > 100
+        ? 100
+        : (d.localPosition.dx * 100) / widget.width < 0
+            ? 0
+            : (d.localPosition.dx * 100) / widget.width;
+    double newTopDelta = d.localPosition.dy > max
+        ? max
+        : d.localPosition.dy < min
+            ? min
+            : d.localPosition.dy;
+    double newLeftDelta = d.localPosition.dx > max
+        ? max
+        : d.localPosition.dx < min
+            ? min
+            : d.localPosition.dx;
 
-    this.position.direction = direction;
-    this.position.acceleration = result.abs() / 7500;
+    if (ny < 50) {
+      this.position.yDirection = MovingDirection.DownWard;
+    } else {
+      this.position.yDirection = MovingDirection.TopWard;
+    }
+
+    if (nx < 50) {
+      this.position.xDirection = MovingDirection.Backward;
+    } else {
+      this.position.xDirection = MovingDirection.Forward;
+    }
+
+    this.position.xAcceleration = (((nx - 50).abs() / 100) * 100) / 50;
+    this.position.yAcceleration = (((ny - 50).abs() / 100) * 100) / 50;
     widget.onChange(this.position);
 
     setState(() {
-      this.leftDelta = nx - 25;
-      this.topDelta = ny - 25;
+      this.topDelta = newTopDelta;
+      this.leftDelta = newLeftDelta;
     });
   }
 
-  onPanReset() {
-    this.position.acceleration = 0;
+  onPanEnd(DragEndDetails _) {
+    this.position.xAcceleration = 0;
+    this.position.yAcceleration = 0;
     widget.onChange(this.position);
 
     setState(() {
-      this.topDelta = 50;
-      this.leftDelta = 50;
+      this.topDelta = widget.width / 2;
+      this.leftDelta = widget.width / 2;
     });
   }
 
@@ -92,38 +129,40 @@ class _JoyStickState extends State<JoyStick> {
       alignment: Alignment.center,
       children: [
         GestureDetector(
-          onPanUpdate: (d) {
-            this.onPanUpdate(d.localPosition.dx, d.localPosition.dy);
-          },
-          onPanEnd: (d) {
-            this.onPanReset();
-          },
-          child: Container(
-            height: 150,
-            width: 150,
-            color: Colors.transparent,
-          ),
-        ),
-        IgnorePointer(
-          child: Container(
-            height: 100,
-            width: 100,
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              shape: BoxShape.circle,
+          onPanUpdate: onPanUpdate,
+          onPanEnd: onPanEnd,
+          child: Opacity(
+            opacity: 0.25,
+            child: Container(
+              height: widget.width,
+              width: widget.width,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.transparent,
+                image: DecorationImage(
+                  image: Image.asset(
+                          "lib/assets/components/joystick/joystick_layout.png")
+                      .image,
+                ),
+              ),
             ),
           ),
         ),
         Positioned(
-          top: this.topDelta,
-          left: this.leftDelta,
+          top: this.topDelta - (widget.width * 0.125),
+          left: this.leftDelta - (widget.width * 0.125),
           child: IgnorePointer(
             child: Container(
-              height: 50,
-              width: 50,
+              height: widget.width * 0.25,
+              width: widget.width * 0.25,
               decoration: BoxDecoration(
-                color: Colors.black87,
                 shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white,
+                    Color(0xFF808080),
+                  ],
+                ),
               ),
             ),
           ),
