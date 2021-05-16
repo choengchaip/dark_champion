@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'controller.dart';
 
 enum MovingDirection {
   Forward,
@@ -8,36 +9,9 @@ enum MovingDirection {
   DownWard,
 }
 
-class IPosition {
-  MovingDirection? xDirection;
-  MovingDirection? yDirection;
-  double? xAcceleration;
-  double? yAcceleration;
-
-  IPosition({
-    this.xDirection,
-    this.yDirection,
-    this.xAcceleration,
-    this.yAcceleration,
-  }) {
-    if (this.xDirection == null) {
-      this.xDirection = MovingDirection.Forward;
-    }
-    if (this.yDirection == null) {
-      this.xDirection = MovingDirection.TopWard;
-    }
-    if (this.xAcceleration == null) {
-      this.xAcceleration = 0.0;
-    }
-    if (this.yAcceleration == null) {
-      this.yAcceleration = 0.0;
-    }
-  }
-}
-
-class JoyStick extends StatefulWidget {
+class JoyStick extends StatefulWidget implements IControllerWidget {
   final double width;
-  final Function(IPosition position) onChange;
+  final Function(dynamic d) onChange;
 
   JoyStick({
     required this.width,
@@ -48,18 +22,35 @@ class JoyStick extends StatefulWidget {
   State<StatefulWidget> createState() {
     return _JoyStickState();
   }
+
+  @override
+  void disable() {
+    // TODO: implement disable
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+  }
+
+  @override
+  void resume() {
+    // TODO: implement resume
+  }
+
+  @override
+  void start({required String playerId}) {
+    // TODO: implement start
+  }
 }
 
 class _JoyStickState extends State<JoyStick> {
-  late IPosition position;
   late bool updatingLoop;
   late double topDelta;
   late double leftDelta;
 
   @override
   void initState() {
-    this.position = IPosition(xAcceleration: 0, yAcceleration: 0);
-    this.updatingLoop = false;
     this.topDelta = widget.width / 2;
     this.leftDelta = widget.width / 2;
 
@@ -91,20 +82,20 @@ class _JoyStickState extends State<JoyStick> {
             : d.localPosition.dx;
 
     if (ny < 50) {
-      this.position.yDirection = MovingDirection.DownWard;
+      // this.position.yDirection = MovingDirection.DownWard;
     } else {
-      this.position.yDirection = MovingDirection.TopWard;
+      // this.position.yDirection = MovingDirection.TopWard;
     }
 
     if (nx < 50) {
-      this.position.xDirection = MovingDirection.Backward;
+      // this.position.xDirection = MovingDirection.Backward;
     } else {
-      this.position.xDirection = MovingDirection.Forward;
+      // this.position.xDirection = MovingDirection.Forward;
     }
 
-    this.position.xAcceleration = (((nx - 50).abs() / 100) * 100) / 50;
-    this.position.yAcceleration = (((ny - 50).abs() / 100) * 100) / 50;
-    widget.onChange(this.position);
+    // this.position.xAcceleration = (((nx - 50).abs() / 100) * 100) / 50;
+    // this.position.yAcceleration = (((ny - 50).abs() / 100) * 100) / 50;
+    widget.onChange(1);
 
     setState(() {
       this.topDelta = newTopDelta;
@@ -113,9 +104,9 @@ class _JoyStickState extends State<JoyStick> {
   }
 
   onPanEnd(DragEndDetails _) {
-    this.position.xAcceleration = 0;
-    this.position.yAcceleration = 0;
-    widget.onChange(this.position);
+    // this.position.xAcceleration = 0;
+    // this.position.yAcceleration = 0;
+    widget.onChange(0);
 
     setState(() {
       this.topDelta = widget.width / 2;
@@ -141,7 +132,7 @@ class _JoyStickState extends State<JoyStick> {
                 color: Colors.transparent,
                 image: DecorationImage(
                   image: Image.asset(
-                          "lib/assets/components/joystick/joystick_layout.png")
+                          "assets/components/joystick/joystick_layout.png")
                       .image,
                 ),
               ),

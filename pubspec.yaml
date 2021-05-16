@@ -35,6 +35,8 @@ dependencies:
   rxdart: ^0.26.0
   visibility_detector: ^0.2.0-nullsafety.1
   another_flushbar: ^1.10.17
+  uuid: ^3.0.4
+  flame: ^1.0.0-rc9
 
 dev_dependencies:
   flutter_test:
@@ -57,7 +59,8 @@ flutter:
     - lib/locales/th.json
     - lib/locales/en.json
     - lib/fonts/
-    - lib/assets/components/joystick/
+    - assets/components/joystick/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
