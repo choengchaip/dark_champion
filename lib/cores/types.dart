@@ -1,12 +1,25 @@
-// IRegisterResult is data interface of result when you register something
-class IRegisterResultData {
-  final bool isPasses;
-  final String registerId;
-  Map<String, dynamic>? others;
+class EventType {
+  EventType();
 
-  IRegisterResultData({
-    required this.isPasses,
-    required this.registerId,
-    this.others,
+  static get player => "player";
+}
+
+class IEventData {
+  final String eventType;
+  final dynamic payload;
+
+  IEventData({
+    required this.eventType,
+    required this.payload,
+  });
+}
+
+class IPlayerPayloadData {
+  final String playerId;
+  final String skillId;
+
+  IPlayerPayloadData({
+    required this.playerId,
+    required this.skillId,
   });
 }

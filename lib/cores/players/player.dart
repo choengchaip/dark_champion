@@ -25,14 +25,13 @@ class PlayerState {
 }
 
 abstract class IPlayer {
-  void skill(String skillId);
+  void skill(String skillId, {Map<String, dynamic>? others});
 }
 
-class Player extends PositionComponent implements IPlayer {
+class Player extends PositionComponent
+    with Hitbox, Collidable
+    implements IPlayer {
   late String current;
-
-  Paint? overridePaint;
-
   final Map<String, bool> removeOnFinish;
   late Map<String, SpriteAnimation> animations;
 
@@ -41,7 +40,6 @@ class Player extends PositionComponent implements IPlayer {
     required String current,
     Vector2? position,
     Vector2? size,
-    this.overridePaint,
     this.removeOnFinish = const {},
   }) : super(
           position: position,
@@ -68,7 +66,7 @@ class Player extends PositionComponent implements IPlayer {
   }
 
   @override
-  void skill(String skillId) {
+  void skill(String skillId, {Map<String, dynamic>? others}) {
     this.current = PlayerState.custom(skillId);
   }
 
@@ -79,7 +77,6 @@ class Player extends PositionComponent implements IPlayer {
     animation?.getSprite().render(
           canvas,
           size: size,
-          overridePaint: overridePaint,
         );
   }
 
@@ -88,5 +85,11 @@ class Player extends PositionComponent implements IPlayer {
   void update(double dt) {
     super.update(dt);
     animation?.update(dt);
+  }
+
+  @override
+  void onCollision(Set<Vector2> intersectionPoints, Collidable other) {
+    print("other");
+    print(other);
   }
 }
